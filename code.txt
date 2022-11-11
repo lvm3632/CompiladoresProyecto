@@ -1,0 +1,8 @@
+int varA;
+int varB;
+varA = 1 + 1;
+varB = 2;
+if ( true ) {
+    int b;
+    b = 3;
+}
