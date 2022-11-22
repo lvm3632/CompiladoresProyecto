@@ -1,8 +1,8 @@
 int varA;
-int varB;
-varA = 1 + 1;
+int varB = 20 * 12 + 5 - 13;
+varA = 1 + 1 * 8;
 varB = 2;
-if ( true ) {
+while ( true ) {
     int b;
     b = 3;
 }

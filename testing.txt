@@ -1,0 +1,14 @@
+int varA;
+int varB;
+varA = 1 + 1 - 5 * 3;
+varB = 2;
+if ( true ) {
+    int b;
+    b = 3;
+}
+
+while ( true ){ 
+    int b;
+    b = 5;
+    print(b);
+}
