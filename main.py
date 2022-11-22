@@ -44,17 +44,20 @@ t_EQ = r'==' # Equals
 t_NE = r'!=' # Not Equals
 # Estados iniciales t_INITIAL or default t_PREFIX
 def t_NAME(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    r'[a-zA-Z_]+[a-zA-Z0-9]*'
     t.type = reserved.get(t.value, 'NAME')    # Check for reserved words
     return t
-def t_INUMBER(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
+    
 def t_FNUMBER(t):
     r'\d+\.\d+'
     t.value = float(t.value)
     return t
+
+def t_INUMBER(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
+
 def t_newline(t):
     r'\n+'
     #t.lexer.lineno += t.value.count("\n")
@@ -80,7 +83,7 @@ def t_error(t):
 # Build the lexer
 import ply.lex as lex
 #lexer = lex.lex(optimize=1, lextab="prueba")
-lexer = lex.lex(debug=1)
+lexer = lex.lex(debug=0)
 # Parsing rules
 
 
@@ -137,16 +140,15 @@ def p_statement_declare_bool(p):
 
 
 def p_statement_if_and_while(p):
-    '''statement : IF LPAREN boolexp RPAREN "{" stmts "}"
-               | WHILE LPAREN boolexp RPAREN "{" stmts "}"'''
+    '''statement : IF LPAREN expression RPAREN "{" stmts "}"
+               | WHILE LPAREN expression RPAREN "{" stmts "}"'''
     n = Node()
-    n.val = p[1]
+    n.type = p[1].upper()
     n2 = Node()
     n2.childrens = p[6]
     n.childrens.append(p[3])
     n.childrens.append(n2)
     p[0] = n
-
 
 def p_statement_assign(p):
     'statement : NAME "=" expression ";"'
@@ -254,13 +256,6 @@ def p_bool_expression(p):
 #     else:
 #          p[0] = p[1]
 
-# def p_bool_expression(p):
-#     "boolexp : BOOLVAL"
-#     n = Node()
-#     n.type = 'BOOLVAL'
-#     n.val = (p[1] == 'true')
-#     p[0] = n
-
 
 # def p_empty(p):
 #     'empty :'
@@ -306,6 +301,8 @@ def genTAC(node):
         return str(node.val)
     elif (node.type == "FNUMBER"):
         return str(node.val)
+    elif (node.type == "BOOLVAL"):
+        return str(node.val)
     elif (node.type == "+"):
         tempVar = "t" + str(varCounter)
         varCounter = varCounter + 1
@@ -338,15 +335,15 @@ def genTAC(node):
         return tempVar
     elif (node.type == "PRINT"):
         print("PRINT " + genTAC(node.childrens[0]))
-    elif ( node.type == "IF" or node.type == "WHILE"):
+    elif (node.type == "IF" or node.type == "WHILE"):
         tempVar = "t" + str(varCounter)
-        varCounter = varCounter +1
+        varCounter = varCounter + 1
         print ( tempVar + " := !" + str(node.childrens[0].val))
         tempLabel = "l" + str(labelCounter)
         labelCounter = labelCounter + 1
         print ( "gotoLabelIf " + tempVar + " " + tempLabel)
         genTAC(node.childrens[1])
-        print ( tempLabel)
+        print (tempLabel)
     elif ( node.type == "FOR"):
         print(node.childrens[0].val +" := "+ str(symbolsTable["table"][node.childrens[0].val].get("value")))
         tempVar = "t" + str(varCounter)
@@ -359,8 +356,13 @@ def genTAC(node):
         genTAC(node.childrens[2])
         print(tempLabel)    
     else:
-        for child in node.childrens:
-            genTAC(child)
+        #if len(node.childrens) > 1:
+            for child in node.childrens:
+                genTAC(child)
+        #else: 
+            #print(node.childrens[0].val +" := "+ str(symbolsTable["table"][node.childrens[0].val].get("value")))
+
+            
 
 print("\ntac:\n")
 genTAC(abstractTree)

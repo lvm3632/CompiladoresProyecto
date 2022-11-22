@@ -1,8 +1,10 @@
-int varA;
-int varB = 20 * 12 + 5 - 13;
-varA = 1 + 1 * 8;
-varB = 2;
-while ( true ) {
-    int b;
-    b = 3;
+float casi23 = 123.2153;
+
+if ( true ){
+    float casi = 123.2153;
+    casi = 123.215;
+}
+
+while ( false ){
+    float casi = 123.2152133 + 12;   
 }
