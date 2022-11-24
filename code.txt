@@ -1,10 +1,17 @@
-float casi23 = 123.2153;
-
-if ( true ){
-    float casi = 123.2153;
-    casi = 123.215;
-}
-
-while ( false ){
-    float casi = 123.2152133 + 12;   
+int da;
+boolean abc = true;
+int bef = 1;
+float cab = 1.1;
+boolean def = true;
+while ( bef < 10 ) {
+  boolean gas = true;
+  if (gas) {
+    print(abc);
+  }elif(gas){
+    print(cab);
+  }else{
+    print(cab);
+  }
+  gas = false;
+  bef = bef + 1;
 }

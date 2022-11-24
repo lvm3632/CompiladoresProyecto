@@ -9,6 +9,7 @@ reserved = {
     "false": "BOOLVAL",
     "if": "IF",
     "else": "ELSE",
+    "elif": "ELIF",
     "and": "AND",
     "or": "OR",
     "while":"WHILE",
@@ -20,8 +21,7 @@ tokens = [
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LPAREN', 'RPAREN'
 ] + list(reserved.values())
 #tokens.extend(reserved.values())
-
-literals = ['^', '=', ';','{','}']
+literals = ['^', '=', ';', '{', '}']
 ######### Start of specification of tokens (4.3) #########
 # Regular expression rules for simple tokens
 t_PLUS = r'\+'
@@ -30,21 +30,20 @@ t_TIMES = r'\*'
 t_DIVIDE = r'/'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-
 # Comparisons
 # Character literals are limited to a single character. +
 # Thus, it is not legal to specify literals such as '<=' or '=='.
 # For this, use the normal lexing rules
 # (e.g., #define a rule such as t_EQ = r'==').
+t_EQ = r'=='  # Equals
+t_NE = r'!='  # Not Equals
 t_LT = r'<' # LESS
 t_GT = r'>' # Greater
 t_LE = r'<=' #  Less equals
 t_GE = r'>=' # Great equals
-t_EQ = r'==' # Equals
-t_NE = r'!=' # Not Equals
 # Estados iniciales t_INITIAL or default t_PREFIX
 def t_NAME(t):
-    r'[a-zA-Z_]+[a-zA-Z0-9]*'
+    r'[a-zA-Z_]+[a-zA-Z_0-9]*'
     t.type = reserved.get(t.value, 'NAME')    # Check for reserved words
     return t
     
@@ -83,7 +82,7 @@ def t_error(t):
 # Build the lexer
 import ply.lex as lex
 #lexer = lex.lex(optimize=1, lextab="prueba")
-lexer = lex.lex(debug=0)
+lexer = lex.lex(debug=1)
 # Parsing rules
 
 
@@ -113,7 +112,6 @@ def p_statements_recursion(p):
     else: 
         p[0] = [ stmt ]
 
-
 def p_statement_declare_int(p):
     'statement : INTDCL NAME ";"'
     symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
@@ -138,10 +136,113 @@ def p_statement_declare_bool(p):
     n.val = p[2]
     p[0] = n
 
+def p_statement_dcl_and_assign(p):
+    '''statement : FLOATDCL NAME "=" expression ";"
+                 | INTDCL NAME "=" expression ";"
+                 | BOOLDCL NAME "=" boolexp ";" '''
+    dcl_type = ''
+    if p[1] == 'int':
+        dcl_type = 'INT_DCL'
+        symbolsTable["table"][p[2]] = {"type": "INT", "value": p[4].val}
+    elif p[1] == 'float':
+        dcl_type = 'FLOAT_DCL'
+        symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": p[4].val}
+    elif p[1] == 'boolean':
+        dcl_type = 'BOOL_DLC'
+        symbolsTable["table"][p[2]] = {"type": "BOOLEAN", "value": p[4].val}
+    n = Node()
+    n.val = p[2]
+    n.type = dcl_type
+    n.childrens.append(p[4])
+    p[0] = n
 
-def p_statement_if_and_while(p):
-    '''statement : IF LPAREN expression RPAREN "{" stmts "}"
-               | WHILE LPAREN expression RPAREN "{" stmts "}"'''
+def p_boolean_value(p):
+  '''boolean_value : boolexp
+                   | NAME '''
+  n = Node()
+  if isinstance(type(p[1]), str) and p[1].type == "BOOLVAL":
+    n.type = 'BOOLEAN'
+    n.val = p[1]
+  else:
+    n.type = 'ID'
+    n.val = p[1]
+  p[0] = n
+
+def p_bool_expression(p):
+    "boolexp : BOOLVAL"
+    n = Node()
+    n.type = 'BOOLVAL'
+    n.val = (p[1] == 'true')
+    p[0] = n
+    
+def p_boolean_expression(p):
+  '''boolean_expression : LPAREN boolean_expression RPAREN
+                        | boolean_expression AND boolean_expression
+                        | boolean_expression OR boolean_expression
+                        | boolean_value
+                        | comparison'''
+  if len(p) > 2:
+    if p[2] in ['and', 'or']:
+      n = Node()
+      n.val = p[2]
+      n.childrens.append(p[1])
+      n.childrens.append(p[3])
+      p[0] = n
+    else:
+      p[0] = p[2]
+  else:
+    p[0] = p[1]
+
+def p_comparison(p):
+  '''comparison : expression EQ expression
+                | expression NE expression
+                | expression GT expression
+                | expression LT expression
+                | expression GE expression
+                | expression LE expression'''
+  n = Node()
+  n.val = p[2]
+  n.type = p[2]
+  n.childrens.append(p[1])
+  n.childrens.append(p[3])
+  p[0] = n
+
+def p_statement_if(p):
+    '''statement : IF LPAREN boolean_expression RPAREN "{" stmts "}" elif else '''
+    n = Node()
+    n.val = "if"
+    n.type = "IF"
+    n.childrens.append(p[3])
+    n.childrens.extend(p[6])
+    if p[8] != None:
+        n.childrens.append(p[8])
+    if p[9] != None:
+        n.childrens.append(p[9])
+    p[0] = n
+
+def p_block_else(p):
+    '''else : ELSE "{" stmts "}"
+                | empty
+        '''
+    if len(p) > 2:
+        n = Node()
+        n.childrens.extend(p[3])
+        n.type = "ELSE"
+        p[0] = n 
+
+def p_elif(p):
+    '''elif : ELIF LPAREN boolean_expression RPAREN "{" stmts "}"
+            | empty'''
+    if len(p) > 2:
+        n = Node()
+        n.val = "elif"
+        n.type ="ELIF"
+        n.childrens.append(p[3])
+        n.childrens.extend(p[6])
+        p[0] = n
+
+def p_statement_while(p):
+    '''statement : WHILE LPAREN boolean_expression RPAREN "{" stmts "}"'''
     n = Node()
     n.type = p[1].upper()
     n2 = Node()
@@ -188,7 +289,9 @@ def p_expression_binop(p):
                   | expression TIMES expression
                   | expression DIVIDE expression
                   | expression '^' expression
-                  | LPAREN expression RPAREN'''
+                  | LPAREN expression RPAREN
+                   '''
+
     if p[2] in ['+', '-', '*', '/', '^']:
         n = Node()
         n.type = p[2]
@@ -197,28 +300,6 @@ def p_expression_binop(p):
         p[0] = n
     else:
         p[0] = p[2]
-
-def p_statement_dcl_and_assign(p):
-    '''statement : FLOATDCL NAME "=" expression ";"
-                 | INTDCL NAME "=" expression ";"
-                 | BOOLDCL NAME "=" boolexp ";" '''
-    dcl_type = ''
-    if p[1] == 'int':
-        dcl_type = 'INT_DCL'
-        symbolsTable["table"][p[2]] = {"type": "INT", "value": p[4].val}
-    elif p[1] == 'float':
-        dcl_type = 'FLOAT_DCL'
-        symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": p[4].val}
-    elif p[1] == 'boolean':
-        dcl_type = 'BOOL_DLC'
-        symbolsTable["table"][p[2]] = {"type": "BOOLEAN", "value": p[4].val}
-    n = Node()
-    n.val = p[2]
-    n.type = dcl_type
-    if len(p) > 3:
-        n.childrens.append(p[4])
-    p[0] = n
-
 
 def p_expression_inumber(p):
     "expression : INUMBER"
@@ -235,31 +316,12 @@ def p_expression_fnumber(p):
     p[0] = n
 
 def p_expression_boolval(p):
-    "expression : boolexp"
-    p[0] = p[1]
+     "expression : boolexp"
+     p[0] = p[1]
 
-def p_bool_expression(p):
-    "boolexp : BOOLVAL"
-    n = Node()
-    n.type = 'BOOLVAL'
-    n.val = (p[1] == 'true')
-    p[0] = n
-
-# def p_expression_boolval(p):
-#     '''expression       :  boolexp AND boolexp
-#                         |  boolexp OR boolexp'''
-#     if len(p) > 2:
-#         if p[2] in ['and', 'or']:
-#          p[0] = Node(p[2], "BOOLEXP", [p[1], p[3]])
-#         else:
-#          p[0] = p[2]
-#     else:
-#          p[0] = p[1]
-
-
-# def p_empty(p):
-#     'empty :'
-#     pass
+def p_empty(p):
+    'empty :'
+    pass
 
 def p_error(p):
     print(p)
@@ -278,9 +340,12 @@ import ply.yacc as yacc
 parser = yacc.yacc(start="prog")
 
 precedence = (
-    ('nonassoc', 'LT', 'GT'),  # Evitar a > b > c pero sí a a > b
+    ('left', 'AND', 'OR'),
+    ('left', 'EQ', 'NE'),
+    ('nonassoc', 'LT', 'GT', 'GE', 'LE'),  # Evitar a > b > c > pero sí a a > b
     ('left', '+', '-'),
     ('left', '*', '/'),
+    ('left', '^'),
     ('right', 'UMINUS'), # Unary minus operator eg: + -5
 )
 
@@ -288,7 +353,7 @@ f = open("code.txt")
 content = f.read()
 print("YACC PARSE: ", yacc.parse(content))
 
-#abstractTree.print()
+abstractTree.print()
 varCounter = 0
 labelCounter = 0
 
@@ -303,6 +368,11 @@ def genTAC(node):
         return str(node.val)
     elif (node.type == "BOOLVAL"):
         return str(node.val)
+    elif (node.type == "ELIF"):
+        return str(node.val)
+    elif (node.type == "ELSE"):
+        print("ELSE? asda??")
+        return str(node.val + "a bueno")
     elif (node.type == "+"):
         tempVar = "t" + str(varCounter)
         varCounter = varCounter + 1
@@ -334,7 +404,7 @@ def genTAC(node):
               genTAC(node.childrens[0]) + " ^ " + genTAC(node.childrens[1]))
         return tempVar
     elif (node.type == "PRINT"):
-        print("PRINT " + genTAC(node.childrens[0]))
+        print( "PRINT "+ genTAC(node.childrens[0]))
     elif (node.type == "IF" or node.type == "WHILE"):
         tempVar = "t" + str(varCounter)
         varCounter = varCounter + 1
@@ -362,10 +432,8 @@ def genTAC(node):
         #else: 
             #print(node.childrens[0].val +" := "+ str(symbolsTable["table"][node.childrens[0].val].get("value")))
 
-            
-
 print("\ntac:\n")
-genTAC(abstractTree)
+#genTAC(abstractTree)
 #Some examples
 # for ( i = 0; i < 3; i++){
 #     stamentes
