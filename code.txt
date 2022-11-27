@@ -1,17 +1,10 @@
-int da;
-boolean abc = true;
-int bef = 1;
-float cab = 1.1;
-boolean def = true;
-while ( bef < 10 ) {
-  boolean gas = true;
-  if (gas) {
+for (int abc = 0; abc < 10; abc/=5){
     print(abc);
-  }elif(gas){
-    print(cab);
-  }else{
-    print(cab);
-  }
-  gas = false;
-  bef = bef + 1;
+}
+
+int bc = 2;
+int dr = 4;
+
+if( bc != dr ){
+    print(bc);
 }

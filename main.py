@@ -185,6 +185,7 @@ def p_boolean_expression(p):
     if p[2] in ['and', 'or']:
       n = Node()
       n.val = p[2]
+      n.type = p[2]
       n.childrens.append(p[1])
       n.childrens.append(p[3])
       p[0] = n
@@ -202,7 +203,7 @@ def p_comparison(p):
                 | expression LE expression'''
   n = Node()
   n.val = p[2]
-  n.type = p[2]
+  n.type = "COMPARISON"
   n.childrens.append(p[1])
   n.childrens.append(p[3])
   p[0] = n
@@ -241,10 +242,11 @@ def p_elif(p):
         n.childrens.extend(p[6])
         p[0] = n
 
+
 def p_statement_while(p):
     '''statement : WHILE LPAREN boolean_expression RPAREN "{" stmts "}"'''
     n = Node()
-    n.type = p[1].upper()
+    n.type = 'WHILE'
     n2 = Node()
     n2.childrens = p[6]
     n.childrens.append(p[3])
@@ -252,7 +254,7 @@ def p_statement_while(p):
     p[0] = n
 
 def p_statement_assign(p):
-    'statement : NAME "=" expression ";"'
+    '''statement : NAME "=" expression ";"'''
     if p[1] not in symbolsTable["table"]:
         print ( "You must declare a variable before using it")
     n = Node()
@@ -291,7 +293,6 @@ def p_expression_binop(p):
                   | expression '^' expression
                   | LPAREN expression RPAREN
                    '''
-
     if p[2] in ['+', '-', '*', '/', '^']:
         n = Node()
         n.type = p[2]
@@ -319,6 +320,64 @@ def p_expression_boolval(p):
      "expression : boolexp"
      p[0] = p[1]
 
+def p_for_statement(p):
+    '''statement : FOR LPAREN statement boolean_expression ";" step RPAREN "{" stmts "}" '''
+    n = Node()
+    n.type = "FOR"
+    n.childrens.append(p[3])
+    n.childrens.append(p[4])
+    n.childrens.append(p[6])
+    n.childrens.extend(p[9])
+    p[0] = n
+    
+def p_step(p):
+    '''step : NAME PLUS "=" INUMBER
+            | NAME MINUS "=" INUMBER
+            | NAME TIMES "=" INUMBER
+            | NAME DIVIDE "=" INUMBER
+            | NAME PLUS PLUS
+            | NAME MINUS MINUS '''
+    if len(p) == 4: 
+        n = Node()  
+        if p[2] in ['+', '-']:
+            n.type = "step"
+            if p[1] in symbolsTable["table"]:
+                n1 = Node()
+                n1.type = 'ID'
+                n1.val = p[1]
+                n.childrens.append(n1)
+                n.val = p[1]
+            else:
+                print("Error undeclared variable")
+                n.val = "UNDECLARED-VARIABLE"
+            postfix = Node()
+            postfix.type = "POSTFIX"
+            postfix.val = p[2] + p[2]
+            n.childrens.append(postfix)
+            p[0] = n
+    elif len(p) == 5:
+        n = Node()
+        if p[2] in ['+', '-', '*', '/']:
+            n.type = "step"
+            if p[1] in symbolsTable["table"]:
+                n1 = Node()
+                n1.type = 'ID'
+                n1.val = p[1]
+                n.childrens.append(n1)
+                n.val = p[1]
+            else:
+                print("Error undeclared variable")
+                n.val = "UNDECLARED-VARIABLE"
+            postfix = Node()
+            postfix.type = "POSTFIX"
+            postfix.val = p[2] + p[3]
+            n.childrens.append(postfix)
+            nbr = Node()
+            nbr.type = "INUMBER"
+            nbr.val = p[4]
+            n.childrens.append(nbr)
+            p[0] = n
+            
 def p_empty(p):
     'empty :'
     pass
