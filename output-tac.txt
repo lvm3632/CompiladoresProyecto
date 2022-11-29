@@ -1,0 +1,38 @@
+i := 0
+l6
+t13 := i < 3
+t12  := ! t13
+gotoLabelIf  t12 l7
+PRINT  i
+t14  :=  i + 1
+i := t14
+gotoLabelIf  t12 l6
+l7
+bc := 2
+dr := 4
+t16 := bc != dr
+t15 :=! t16
+gotoLabelIf t15 l8
+PRINT  bc
+l8
+t18  :=  2 + 3
+t17  :=  1 + t18
+varA := t17
+varB := 2
+t20 := varA == varB
+t19 :=! t20
+gotoLabelIf t19 l9
+l9
+b := 3
+PRINT  varA
+PRINT  b
+varB := 2
+l10
+t22 := varB != varA
+t21 :=! t22
+gotoLabelIf t21 l11
+asd := 123
+t23  :=  123 * 1243
+abc123 := t23
+gotoLabelIf t21 l10
+l11

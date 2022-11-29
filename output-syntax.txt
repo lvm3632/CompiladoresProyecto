@@ -1,0 +1,67 @@
+root : 
+-FOR : 
+--ASSIGN : =
+---INT_DCL : i
+---INUMBER : 0
+--< : <
+---ID : i
+---INUMBER : 3
+--ASSIGN : =
+---ID : i
+---+ : 
+----ID : i
+----INUMBER : 1
+--PRINT : 
+---ID : i
+-ASSIGN : =
+--INT_DCL : bc
+--INUMBER : 2
+-ASSIGN : =
+--INT_DCL : dr
+--INUMBER : 4
+-IF : if
+--!= : !=
+---ID : bc
+---ID : dr
+--PRINT : 
+---ID : bc
+-INT_DCL : varA
+-INT_DCL : varB
+-ASSIGN : =
+--ID : varA
+--+ : 
+---INUMBER : 1
+---+ : 
+----INUMBER : 2
+----INUMBER : 3
+-ASSIGN : =
+--ID : varB
+--INUMBER : 2
+-IF : if
+--== : ==
+---ID : varA
+---ID : varB
+--INT_DCL : b
+--ASSIGN : =
+---ID : b
+---INUMBER : 3
+--PRINT : 
+---ID : varA
+-PRINT : 
+--ID : b
+-ASSIGN : =
+--ID : varB
+--INUMBER : 2
+-WHILE : 
+--!= : !=
+---ID : varB
+---ID : varA
+-- : 
+---ASSIGN : =
+----INT_DCL : asd
+----INUMBER : 123
+---ASSIGN : =
+----FLOAT_DCL : abc123
+----* : 
+-----INUMBER : 123
+-----INUMBER : 1243

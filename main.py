@@ -112,30 +112,6 @@ def p_statements_recursion(p):
     else: 
         p[0] = [ stmt ]
 
-def p_statement_declare_int(p):
-    'statement : INTDCL NAME ";"'
-    symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
-    n = Node()
-    n.type = "INT_DLC"
-    n.val = p[2]
-    p[0] = n
-
-def p_statement_declare_float(p):
-    'statement : FLOATDCL NAME ";"'
-    symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": 0}
-    n = Node()
-    n.type = "FLOAT_DLC"
-    n.val = p[2]
-    p[0] = n
-
-def p_statement_declare_bool(p):
-    'statement : BOOLDCL NAME ";"'
-    symbolsTable["table"][p[2]] = {"type": "BOOLEAN", "value": False}
-    n = Node()
-    n.type = "BOOL_DLC"
-    n.val = p[2]
-    p[0] = n
-
 def p_statement_dcl_and_assign(p):
     '''statement : FLOATDCL NAME "=" expression ";"
                  | INTDCL NAME "=" expression ";"
@@ -148,13 +124,49 @@ def p_statement_dcl_and_assign(p):
         dcl_type = 'FLOAT_DCL'
         symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": p[4].val}
     elif p[1] == 'boolean':
-        dcl_type = 'BOOL_DLC'
+        dcl_type = 'BOOL_DCL'
         symbolsTable["table"][p[2]] = {"type": "BOOLEAN", "value": p[4].val}
     n = Node()
-    n.val = p[2]
-    n.type = dcl_type
+    n.val = "="
+    n.type = "ASSIGN"
+    n1 = Node()
+    n1.type = dcl_type
+    n1.val = p[2]
+    n.childrens.append(n1)
     n.childrens.append(p[4])
+
+    # idName = Node()
+    # idName.val = p[2]
+    # idName.type = "ID"
+    # assign.childrens.append(idName)
+    #n.childrens.append(p[4])
     p[0] = n
+
+
+def p_statement_declare_int(p):
+    'statement : INTDCL NAME ";"'
+    symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
+    n = Node()
+    n.type = "INT_DCL"
+    n.val = p[2]
+    p[0] = n
+
+def p_statement_declare_float(p):
+    'statement : FLOATDCL NAME ";"'
+    symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": 0}
+    n = Node()
+    n.type = "FLOAT_DCL"
+    n.val = p[2]
+    p[0] = n
+
+def p_statement_declare_bool(p):
+    'statement : BOOLDCL NAME ";"'
+    symbolsTable["table"][p[2]] = {"type": "BOOLEAN", "value": False}
+    n = Node()
+    n.type = "BOOL_DCL"
+    n.val = p[2]
+    p[0] = n
+
 
 def p_boolean_value(p):
   '''boolean_value : boolexp
@@ -164,8 +176,8 @@ def p_boolean_value(p):
     n.type = 'BOOLEAN'
     n.val = p[1]
   else:
-    n.type = 'ID'
-    n.val = p[1]
+    n.type = 'BOOLVAL'
+    n.val = str(p[1].val).lower()
   p[0] = n
 
 def p_bool_expression(p):
@@ -185,7 +197,7 @@ def p_boolean_expression(p):
     if p[2] in ['and', 'or']:
       n = Node()
       n.val = p[2]
-      n.type = p[2]
+      n.type = p[2].upper() 
       n.childrens.append(p[1])
       n.childrens.append(p[3])
       p[0] = n
@@ -203,7 +215,7 @@ def p_comparison(p):
                 | expression LE expression'''
   n = Node()
   n.val = p[2]
-  n.type = "COMPARISON"
+  n.type = p[2]
   n.childrens.append(p[1])
   n.childrens.append(p[3])
   p[0] = n
@@ -242,7 +254,6 @@ def p_elif(p):
         n.childrens.extend(p[6])
         p[0] = n
 
-
 def p_statement_while(p):
     '''statement : WHILE LPAREN boolean_expression RPAREN "{" stmts "}"'''
     n = Node()
@@ -258,15 +269,13 @@ def p_statement_assign(p):
     if p[1] not in symbolsTable["table"]:
         print ( "You must declare a variable before using it")
     n = Node()
-    n.type = 'ASIGN'
+    n.type = 'ASSIGN'
+    n.val = "="
     ##n.childrens.append(p[1])
-    if p[1] in symbolsTable["table"]:
-        n1 = Node()
-        n1.type = 'ID'
-        n1.val = p[1]
-        n.childrens.append(n1)
-    else: 
-        print("Error undeclared variable")
+    n1 = Node()
+    n1.type = 'ID'
+    n1.val = p[1]
+    n.childrens.append(n1)
     n.childrens.append(p[3])
     p[0] = n
 
@@ -340,44 +349,52 @@ def p_step(p):
     if len(p) == 4: 
         n = Node()  
         if p[2] in ['+', '-']:
-            n.type = "step"
+            n.type = "ASSIGN"
             if p[1] in symbolsTable["table"]:
                 n1 = Node()
                 n1.type = 'ID'
                 n1.val = p[1]
                 n.childrens.append(n1)
-                n.val = p[1]
+                n.val = "="
             else:
                 print("Error undeclared variable")
                 n.val = "UNDECLARED-VARIABLE"
             postfix = Node()
-            postfix.type = "POSTFIX"
-            postfix.val = p[2] + p[2]
+            postfix.type = p[2]
+            n2 = Node()
+            n2.val = p[1]
+            n2.type = "ID"
+            n3 = Node()
+            n3.val = 1
+            n3.type = "INUMBER"
+            postfix.childrens.append(n2)
+            postfix.childrens.append(n3)
+            #postfix.val = 1
             n.childrens.append(postfix)
             p[0] = n
     elif len(p) == 5:
         n = Node()
         if p[2] in ['+', '-', '*', '/']:
-            n.type = "step"
+            n.type = "ASSIGN"
             if p[1] in symbolsTable["table"]:
                 n1 = Node()
                 n1.type = 'ID'
                 n1.val = p[1]
                 n.childrens.append(n1)
-                n.val = p[1]
+                op = Node()
+                op.type = p[2]
+                nbr = Node()
+                nbr.type = "INUMBER"
+                nbr.val = p[4]
+                op.childrens.append(n1)
+                op.childrens.append(nbr)
+
+                n.childrens.append(op)
+                p[0] = n
             else:
                 print("Error undeclared variable")
                 n.val = "UNDECLARED-VARIABLE"
-            postfix = Node()
-            postfix.type = "POSTFIX"
-            postfix.val = p[2] + p[3]
-            n.childrens.append(postfix)
-            nbr = Node()
-            nbr.type = "INUMBER"
-            nbr.val = p[4]
-            n.childrens.append(nbr)
-            p[0] = n
-            
+
 def p_empty(p):
     'empty :'
     pass
@@ -391,13 +408,11 @@ def p_error(p):
         # or parser.token() # or parser.restart()
     else:
         print("Syntax error at EOF")
-
 ## Precedence:
 ## TIMES/DIVIDE have higher precedence than PLUS/MINUS 
 # (since they appear later in the precedence specification).
 import ply.yacc as yacc
 parser = yacc.yacc(start="prog")
-
 precedence = (
     ('left', 'AND', 'OR'),
     ('left', 'EQ', 'NE'),
@@ -408,91 +423,123 @@ precedence = (
     ('right', 'UMINUS'), # Unary minus operator eg: + -5
 )
 
+def getTacFile():
+    file = open("output-tac.txt", "w")
+    sys.stdout = file
+    genTAC(abstractTree)
+    f.close()
+
+def getSyntFile():
+    file = open("output-syntax.txt", "w")
+    sys.stdout = file
+    abstractTree.print()
+    f.close()
+
 f = open("code.txt")
 content = f.read()
 print("YACC PARSE: ", yacc.parse(content))
 
+print("======= Start of Syntax Analysis (Tree) =======")
 abstractTree.print()
+print("======= End of Syntax Analysis (Tree)  =======")
+# print("\n======= Start of Semantic Analysis (Tree) =======")
+# #abstractTree.semanticPrint()
+# print("======= End of Semantic Analysis (Tree)  =======\n")
+declTags = ['INUMBER', 'FNUMBER', 'BOOLVAL', 'ID']
+opSymbols = ['+', '-', '*', '/', '^']
+compSymbols = ['!=', '==', 'AND', 'OR', '>', '<', '>=', '<=']
 varCounter = 0
 labelCounter = 0
 
 def genTAC(node):
-    global varCounter
-    global labelCounter
-    if (node.type == "ASIGN"):
-        print(node.childrens[0].val + " := " + genTAC(node.childrens[1]))
-    elif (node.type == "INUMBER"):
-        return str(node.val)
-    elif (node.type == "FNUMBER"):
-        return str(node.val)
-    elif (node.type == "BOOLVAL"):
-        return str(node.val)
-    elif (node.type == "ELIF"):
-        return str(node.val)
-    elif (node.type == "ELSE"):
-        print("ELSE? asda??")
-        return str(node.val + "a bueno")
-    elif (node.type == "+"):
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter + 1
-        print(tempVar + " := " +
-              genTAC(node.childrens[0]) + " + " + genTAC(node.childrens[1]))
-        return tempVar
-    elif (node.type == "*"):
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter + 1
-        print(tempVar + " := " +
-              genTAC(node.childrens[0]) + " * " + genTAC(node.childrens[1]))
-        return tempVar
-    elif (node.type == "/"):
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter + 1
-        print(tempVar + " := " +
-              genTAC(node.childrens[0]) + " / " + genTAC(node.childrens[1]))
-        return tempVar
-    elif (node.type == "-"):
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter + 1
-        print(tempVar + " := " +
-              genTAC(node.childrens[0]) + " - " + genTAC(node.childrens[1]))
-        return tempVar
-    elif (node.type == "^"):
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter + 1
-        print(tempVar + " := " +
-              genTAC(node.childrens[0]) + " ^ " + genTAC(node.childrens[1]))
-        return tempVar
-    elif (node.type == "PRINT"):
-        print( "PRINT "+ genTAC(node.childrens[0]))
-    elif (node.type == "IF" or node.type == "WHILE"):
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter + 1
-        print ( tempVar + " := !" + str(node.childrens[0].val))
-        tempLabel = "l" + str(labelCounter)
-        labelCounter = labelCounter + 1
-        print ( "gotoLabelIf " + tempVar + " " + tempLabel)
-        genTAC(node.childrens[1])
-        print (tempLabel)
-    elif ( node.type == "FOR"):
-        print(node.childrens[0].val +" := "+ str(symbolsTable["table"][node.childrens[0].val].get("value")))
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter +1
-        print(tempVar+ " := " + str(node.childrens[1].val))
-        tempLabel = "l" + str(labelCounter)
-        labelCounter = labelCounter + 1
-        print ( "gotoLabelIf " + tempVar + " " + tempLabel)
-        genTAC(node.childrens[3])
-        genTAC(node.childrens[2])
-        print(tempLabel)    
-    else:
-        #if len(node.childrens) > 1:
+    try:
+        global varCounter
+        global labelCounter
+        ##print(node.type, "NODE")
+        if (node.type == "ASSIGN"):
+            print(node.childrens[0].val, ":=", genTAC(node.childrens[1]))
+        elif (node.type in declTags):
+            return str(node.val)
+        elif (node.type in compSymbols):
+            tempVar = "t" + str(varCounter)
+            varCounter = varCounter + 1
+            print(tempVar, ":=",
+                genTAC(node.childrens[0]), node.type, genTAC(node.childrens[1]))
+            return tempVar
+        elif (node.type in opSymbols):
+            tempVar = "t" + str(varCounter)
+            varCounter = varCounter + 1
+            print(tempVar, " := ",
+                genTAC(node.childrens[0]), node.type, genTAC(node.childrens[1]))
+            return tempVar
+        elif (node.type == "PRINT"):
+            print("PRINT ", genTAC(node.childrens[0]))
+        elif (node.type == "IF"):
+            tempVar = "t" + str(varCounter)
+            varCounter = varCounter + 1
+            print(tempVar, ":=!", genTAC(node.childrens[0]))
+            tempLabel = "l" + str(labelCounter)
+            labelCounter = labelCounter + 1
+            print("gotoLabelIf", tempVar, tempLabel)
+            genTAC(node.childrens[1])
+            print(tempLabel)
+            for child in node.childrens[2:len(node.childrens)]:
+                genTAC(child)
+        elif (node.type == "ELIF"):
+            tempVar = "t" + str(varCounter)
+            varCounter = varCounter + 1
+            print(tempVar, " :=!", genTAC(node.childrens[0]))
+            tempLabel = "l" + str(labelCounter)
+            labelCounter = labelCounter + 1
+            print("gotoLabelIf ", tempVar, tempLabel)
+            genTAC(node.childrens[1])
+            print(tempLabel)
+            for child in node.childrens[2:len(node.childrens)]:
+                genTAC(child)
+        elif (node.type == "ELSE"):
+            genTAC(node.childrens[0])
+        elif (node.type == "WHILE"):
+            tmplbl1 = "l" + str(labelCounter)
+            labelCounter = labelCounter + 1
+            print(tmplbl1)
+            tempVar = "t" + str(varCounter)
+            varCounter = varCounter + 1
+            print(tempVar + " :=!", genTAC(node.childrens[0]))
+            tmplbl2 = "l" + str(labelCounter)
+            labelCounter = labelCounter + 1
+            print("gotoLabelIf", tempVar, tmplbl2)
+            genTAC(node.childrens[1])
+            print("gotoLabelIf", tempVar, tmplbl1)
+            print(tmplbl2)
+        elif (node.type == "FOR"):
+            genTAC(node.childrens[0])
+            tmplbl1 = "l" + str(labelCounter)
+            labelCounter = labelCounter + 1
+            print(tmplbl1)
+            tempVar = "t" + str(varCounter)
+            varCounter = varCounter + 1
+            print(tempVar, " := !", genTAC(node.childrens[1]))
+            tmplbl2 = "l" + str(labelCounter)
+            labelCounter = labelCounter + 1
+            print("gotoLabelIf ", tempVar, tmplbl2)
+            genTAC(node.childrens[3])
+            genTAC(node.childrens[2])
+            print("gotoLabelIf ", tempVar, tmplbl1)
+            print(tmplbl2)
+        else:
             for child in node.childrens:
                 genTAC(child)
-        #else: 
-            #print(node.childrens[0].val +" := "+ str(symbolsTable["table"][node.childrens[0].val].get("value")))
+    except:
+        print("Input inválido")
 
-print("\ntac:\n")
-#genTAC(abstractTree)
+
+print("\n======= Start of TAC =======")
+genTAC(abstractTree)
+print("======= End of TAC =======")
+
+# Output TAC to file
+getSyntFile()
+getTacFile()
 #Some examples
 # for ( i = 0; i < 3; i++){
 #     stamentes
