@@ -174,17 +174,21 @@ def p_boolean_value(p):
   n = Node()
   if isinstance(type(p[1]), str) and p[1].type == "BOOLVAL":
     n.type = 'BOOLEAN'
+    boolstr = "true" if p[1] == True else "false"
+
     n.val = p[1]
   else:
     n.type = 'BOOLVAL'
-    n.val = str(p[1].val).lower()
+    boolstr = "true" if p[1] == True else "false"
+    n.val = boolstr
   p[0] = n
 
 def p_bool_expression(p):
     "boolexp : BOOLVAL"
     n = Node()
     n.type = 'BOOLVAL'
-    n.val = (p[1] == 'true')
+    boolstr = "true" if p[1] == True else "false"
+    n.val = boolstr
     p[0] = n
     
 def p_boolean_expression(p):
@@ -442,14 +446,45 @@ print("YACC PARSE: ", yacc.parse(content))
 print("======= Start of Syntax Analysis (Tree) =======")
 abstractTree.print()
 print("======= End of Syntax Analysis (Tree)  =======")
-# print("\n======= Start of Semantic Analysis (Tree) =======")
-# #abstractTree.semanticPrint()
-# print("======= End of Semantic Analysis (Tree)  =======\n")
+
 declTags = ['INUMBER', 'FNUMBER', 'BOOLVAL', 'ID']
 opSymbols = ['+', '-', '*', '/', '^']
 compSymbols = ['!=', '==', 'AND', 'OR', '>', '<', '>=', '<=']
 varCounter = 0
 labelCounter = 0
+
+def semanticValidation(node, lvl=0, type = 'init', var = ''):
+    try:
+        typeAssign = type
+        variable = var
+        if (node.type == "ASSIGN" and node.childrens[0].type == 'INT_DCL'):
+            typeAssign = 'INT_DCL'
+            for child in node.childrens:
+                if child.type == "FNUMBER" or child.type == "BOOLVAL":
+                    print("Please assign only integers numbers to ID: " +
+                          node.childrens[0].val)
+                semanticValidation(child, lvl+1, 'INT_DCL',
+                                   node.childrens[0].val)
+        elif (node.type == "ASSIGN" and node.childrens[0].type == "FLOAT_DCL"):
+            typeAssign = 'FLOAT_DCL'
+            for child in node.childrens:
+                if child.type == "BOOLVAL":
+                    print("Please assign only integers or float numbers to ID: " +
+                          node.childrens[0].val)
+                semanticValidation(child, lvl+1, 'FLOAT_DCL',
+                                   node.childrens[0].val)
+        else:
+            for child in node.childrens:
+                if lvl > 0 and typeAssign == "INT_DCL":
+                    if child.type == "FNUMBER" or child.type == "BOOLVAL":
+                        print("Please assign only integers numbers to ID: ", variable)
+                elif lvl > 0 and typeAssign == "FLOAT_DCL":
+                    if child.type == "BOOLVAL":
+                        print(
+                            "Please assign only integers or float numbers to ID:", variable)
+                semanticValidation(child, lvl+1, "init", variable)
+    except:
+        print("\nErr: semanticValidation")
 
 def genTAC(node):
     try:
@@ -532,14 +567,18 @@ def genTAC(node):
     except:
         print("Input inválido")
 
+print("\n======= Start of Semantic Analysis (Tree) =======")
+semanticValidation(abstractTree)
+print("======= End of Semantic Analysis (Tree)  =======\n")
 
 print("\n======= Start of TAC =======")
 genTAC(abstractTree)
 print("======= End of TAC =======")
-
-# Output TAC to file
+print("output-syntax.txt generated")
+print("output-tac.txt generated")
 getSyntFile()
 getTacFile()
+
 #Some examples
 # for ( i = 0; i < 3; i++){
 #     stamentes

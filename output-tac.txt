@@ -1,38 +1,76 @@
-i := 0
-l6
-t13 := i < 3
-t12  := ! t13
-gotoLabelIf  t12 l7
-PRINT  i
-t14  :=  i + 1
-i := t14
-gotoLabelIf  t12 l6
-l7
-bc := 2
-dr := 4
-t16 := bc != dr
-t15 :=! t16
-gotoLabelIf t15 l8
-PRINT  bc
-l8
-t18  :=  2 + 3
-t17  :=  1 + t18
-varA := t17
-varB := 2
-t20 := varA == varB
-t19 :=! t20
-gotoLabelIf t19 l9
+abc := 0
 l9
+t35 := abc < 10
+t34  := ! t35
+gotoLabelIf  t34 l10
+PRINT  abc
+t36  :=  abc / 5
+abc := t36
+gotoLabelIf  t34 l9
+l10
+t41  :=  12301 + 123.125
+t40  :=  125.125 * t41
+t39  :=  1250 + t40
+t38  :=  1240.2134 * t39
+t37  :=  2 * t38
+bc := t37
+dr := 4
+t44 := bc != dr
+t43 := t44 AND false
+t42 :=! t43
+gotoLabelIf t42 l11
+PRINT  bc
+l11
+varA := 41
+t45  :=  123.21 * 123
+declarando := t45
+t48  :=  3 + 150.23
+t47  :=  2 + t48
+t46  :=  1 + t47
+varA := t46
+varB := 2
+t49 :=! false
+gotoLabelIf t49 l12
+l12
 b := 3
 PRINT  varA
+t50  :=  1123.125 * 50
+asdas := t50
 PRINT  b
-varB := 2
-l10
-t22 := varB != varA
-t21 :=! t22
-gotoLabelIf t21 l11
+t51  :=  2 + 2012.123
+varB := t51
+comp := false
+l13
+t52 :=! false
+gotoLabelIf t52 l14
 asd := 123
-t23  :=  123 * 1243
-abc123 := t23
-gotoLabelIf t21 l10
-l11
+t56  :=  1230.5 - 120
+t55  :=  123.5012 + t56
+t54  :=  1243 + t55
+t53  :=  123 * t54
+abc123 := t53
+t59  :=  12091.124 + 12
+t58  :=  50 * t59
+t57  :=  1123.125 * t58
+asdas := t57
+t61 := asdas != 234
+t60 :=! t61
+gotoLabelIf t60 l15
+PRINT  asdas
+l15
+gotoLabelIf t52 l13
+l14
+bc := 10
+cd := 20
+t64 := bc > cd
+t63 := t64 AND false
+t62 :=! t63
+gotoLabelIf t62 l16
+PRINT  bc
+l16
+t67 := false != false
+t66 := false AND t67
+t65 :=! t66
+gotoLabelIf t65 l17
+acd := false
+l17

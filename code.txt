@@ -2,9 +2,48 @@ for (int abc = 0; abc < 10; abc/=5){
     print(abc);
 }
 
-int bc = 2;
+int abr;
+int bc = 2 * 1240.2134 * 1250 + 125.125 *12301 + 123.125;
 int dr = 4;
 
-if( bc != dr ){
+if( bc != dr and bc){
     print(bc);
+}
+
+int varA = 41;
+int varB;
+float sindeclarar;
+float declarando = 123.210 * 123;
+varA = 1 + 2 + 3 + 150.23;
+varB = 2;
+if ( true ) {
+    int b;
+    b = 3;
+    print(varA);
+    float asdas = 1123.125 * 50;
+}
+
+print(b);
+varB = 2 + 2012.123;
+boolean comp = true;
+
+while ( false ) {
+    int asd = 123;
+    float abc123 = 123 * 1243 + 123.5012 + 1230.50 - 120;
+    float asdas = 1123.125 * 50 * 12091.124 + 12;
+    if( asdas != 234 ){
+        print(asdas);
+    }
+
+}
+
+int bc = 10;
+int cd = 20;
+
+if (bc > cd and comp){
+    print(bc);
+}
+
+if ( true and true != false ){
+    int acd = true;
 }

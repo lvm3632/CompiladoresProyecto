@@ -1,61 +1,90 @@
 root : 
 -FOR : 
 --ASSIGN : =
----INT_DCL : i
+---INT_DCL : abc
 ---INUMBER : 0
 --< : <
----ID : i
----INUMBER : 3
---ASSIGN : =
----ID : i
----+ : 
-----ID : i
-----INUMBER : 1
+---ID : abc
+---INUMBER : 10
+--ASSIGN : 
+---ID : abc
+---/ : 
+----ID : abc
+----INUMBER : 5
 --PRINT : 
----ID : i
+---ID : abc
+-INT_DCL : abr
 -ASSIGN : =
 --INT_DCL : bc
---INUMBER : 2
+--* : 
+---INUMBER : 2
+---* : 
+----FNUMBER : 1240.2134
+----+ : 
+-----INUMBER : 1250
+-----* : 
+------FNUMBER : 125.125
+------+ : 
+-------INUMBER : 12301
+-------FNUMBER : 123.125
 -ASSIGN : =
 --INT_DCL : dr
 --INUMBER : 4
 -IF : if
---!= : !=
----ID : bc
----ID : dr
+--AND : and
+---!= : !=
+----ID : bc
+----ID : dr
+---BOOLVAL : false
 --PRINT : 
 ---ID : bc
--INT_DCL : varA
+-ASSIGN : =
+--INT_DCL : varA
+--INUMBER : 41
 -INT_DCL : varB
+-FLOAT_DCL : sindeclarar
+-ASSIGN : =
+--FLOAT_DCL : declarando
+--* : 
+---FNUMBER : 123.21
+---INUMBER : 123
 -ASSIGN : =
 --ID : varA
 --+ : 
 ---INUMBER : 1
 ---+ : 
 ----INUMBER : 2
-----INUMBER : 3
+----+ : 
+-----INUMBER : 3
+-----FNUMBER : 150.23
 -ASSIGN : =
 --ID : varB
 --INUMBER : 2
 -IF : if
---== : ==
----ID : varA
----ID : varB
+--BOOLVAL : false
 --INT_DCL : b
 --ASSIGN : =
 ---ID : b
 ---INUMBER : 3
 --PRINT : 
 ---ID : varA
+--ASSIGN : =
+---FLOAT_DCL : asdas
+---* : 
+----FNUMBER : 1123.125
+----INUMBER : 50
 -PRINT : 
 --ID : b
 -ASSIGN : =
 --ID : varB
---INUMBER : 2
+--+ : 
+---INUMBER : 2
+---FNUMBER : 2012.123
+-ASSIGN : =
+--BOOL_DCL : comp
+--BOOLVAL : false
 -WHILE : 
---!= : !=
----ID : varB
----ID : varA
+--BOOLVAL : false
 -- : 
 ---ASSIGN : =
 ----INT_DCL : asd
@@ -64,4 +93,48 @@ root :
 ----FLOAT_DCL : abc123
 ----* : 
 -----INUMBER : 123
------INUMBER : 1243
+-----+ : 
+------INUMBER : 1243
+------+ : 
+-------FNUMBER : 123.5012
+-------- : 
+--------FNUMBER : 1230.5
+--------INUMBER : 120
+---ASSIGN : =
+----FLOAT_DCL : asdas
+----* : 
+-----FNUMBER : 1123.125
+-----* : 
+------INUMBER : 50
+------+ : 
+-------FNUMBER : 12091.124
+-------INUMBER : 12
+---IF : if
+----!= : !=
+-----ID : asdas
+-----INUMBER : 234
+----PRINT : 
+-----ID : asdas
+-ASSIGN : =
+--INT_DCL : bc
+--INUMBER : 10
+-ASSIGN : =
+--INT_DCL : cd
+--INUMBER : 20
+-IF : if
+--AND : and
+---> : >
+----ID : bc
+----ID : cd
+---BOOLVAL : false
+--PRINT : 
+---ID : bc
+-IF : if
+--AND : and
+---BOOLVAL : false
+---!= : !=
+----BOOLVAL : false
+----BOOLVAL : false
+--ASSIGN : =
+---INT_DCL : acd
+---BOOLVAL : false

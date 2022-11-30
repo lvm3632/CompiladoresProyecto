@@ -15,31 +15,8 @@ class Node:
             for c in self.childrens:
                 c.print(lvl+1)
         except:
-            print("Semantic invalid")
+            print("Err: invalid")
 
-    def semanticPrint(self, lvl=0):
-        r = (' ' * lvl) + self.type + ":" + str(self.val)
-        #print(r)
-        #print(self.childrens)
-        stack = []
-        #print(" ANOTHER INT ")
-        #print(self.type, "Que es parent")
-        if self.type == "INT_DCL":
-            for leaf in self.childrens:
-                print((' ' * lvl) + "parent: ", self.val, "hoja tipo:", leaf.type, "hoja valor: ", leaf.val, "Primer hijo: " ,leaf.childrens)
-                if len(leaf.childrens) > 1:
-                    print(leaf.childrens[1].childrens, "CUANTOS")
-            #     for hijos in leaf.childrens:
-            #         lvlInner = lvl
-            #         print(hijos.val)
-            #         hijos.semanticPrint(lvlInner+1)
-
-            #     leaf.semanticPrint(lvl+1)
-        for parent in self.childrens:
-            parent.semanticPrint(lvl+1)
-                #stack.append(parent)
-            #print("parent", parent.type)
-                #print(parent.val)    
     def __repr__(self) -> str:
         return str(self.type) + " [Value]: " + str(self.val)
 
