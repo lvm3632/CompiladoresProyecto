@@ -8,14 +8,14 @@ class Node:
 
     def print(self, lvl=0):
         try:
-            r = ('-' * lvl) + self.type + " : " + str(self.val)
+            r = ('-' * lvl) + self.type + " : " + str(self.val) 
             print(r)
             #print(self.childrens)
             #print(self.type)
             for c in self.childrens:
                 c.print(lvl+1)
         except:
-            print("Err: invalid")
+            print("Err: Variable not found")
 
     def __repr__(self) -> str:
         return str(self.type) + " [Value]: " + str(self.val)

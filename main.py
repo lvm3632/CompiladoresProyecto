@@ -452,37 +452,84 @@ opSymbols = ['+', '-', '*', '/', '^']
 compSymbols = ['!=', '==', 'AND', 'OR', '>', '<', '>=', '<=']
 varCounter = 0
 labelCounter = 0
-
-def semanticValidation(node, lvl=0, type = 'init', var = ''):
+assignId = ''
+def semanticValidation(node, lvl=0, type = 'init', var = '', initialVar = ''):
     try:
         typeAssign = type
         variable = var
+        assignId = initialVar
         if (node.type == "ASSIGN" and node.childrens[0].type == 'INT_DCL'):
             typeAssign = 'INT_DCL'
+            assignId = node.childrens[0].val
             for child in node.childrens:
                 if child.type == "FNUMBER" or child.type == "BOOLVAL":
-                    print("Please assign only integers numbers to ID: " +
+                    print("Please assign only integers numbers or variables  to ID: " +
                           node.childrens[0].val)
                 semanticValidation(child, lvl+1, 'INT_DCL',
-                                   node.childrens[0].val)
+                                   node.childrens[0].val, assignId)
         elif (node.type == "ASSIGN" and node.childrens[0].type == "FLOAT_DCL"):
             typeAssign = 'FLOAT_DCL'
+            assignId = node.childrens[0].val
             for child in node.childrens:
                 if child.type == "BOOLVAL":
                     print("Please assign only integers or float numbers to ID: " +
                           node.childrens[0].val)
                 semanticValidation(child, lvl+1, 'FLOAT_DCL',
-                                   node.childrens[0].val)
+                                   node.childrens[0].val, assignId)
+        elif (node.type == "ASSIGN" and node.childrens[0].type == "ID"):
+            typeAssign = "ID"
+            assignId = node.childrens[0].val
+            typeParent = symbolsTable["table"][assignId]['type']
+            for child in node.childrens:
+                if typeParent == 'INT' and child.type not in opSymbols and child.type != 'INUMBER' and child.type != 'ID':
+                    print("Please assign only integers numbers to ID: ", assignId)
+                semanticValidation(child, lvl+1, 'ID',
+                                    node.childrens[0].val, assignId)       
+                # TODO: abc = var;      
+            if node.childrens[0].type == "ID" and node.childrens[1].type == "ID":
+                childOne = node.childrens[1].val
+                typeChildOne = symbolsTable["table"][childOne]['type']
+                if typeChildOne != typeParent:
+                    print("Please assign only integers variables to ID: ", assignId)
+                    semanticValidation(child, lvl+1, 'ID',
+                                    node.childrens[0].val, assignId)
         else:
             for child in node.childrens:
                 if lvl > 0 and typeAssign == "INT_DCL":
                     if child.type == "FNUMBER" or child.type == "BOOLVAL":
-                        print("Please assign only integers numbers to ID: ", variable)
+                        print("Please assign only integers numbers to ID: ", assignId)
+                    if child.type == "ID":
+                        typeParent = symbolsTable["table"][assignId]['type']
+                        if typeParent == 'INT' and child.type not in opSymbols and child.type != 'INUMBER':
+                            typeChild = symbolsTable["table"][child.val]['type']
+                            if typeParent != typeChild:
+                                print(
+                                    "Please assign only integers variables to ID (else 1): ", assignId)   
+                        else:
+                            print("Please assign only integers and variables numbers to INT_DCL (else 2): ",
+                                  assignId)
+                    semanticValidation(child, lvl+1, "INT_DCL", child.val, assignId)
                 elif lvl > 0 and typeAssign == "FLOAT_DCL":
                     if child.type == "BOOLVAL":
                         print(
                             "Please assign only integers or float numbers to ID:", variable)
-                semanticValidation(child, lvl+1, "init", variable)
+                    semanticValidation(child, lvl+1, "FLOAT_DCL", typeAssign)
+
+                elif lvl > 0 and typeAssign == "ID":
+                    typeParent = symbolsTable["table"][assignId]['type']
+                    valueParent = symbolsTable["table"][assignId]['value']
+                    if typeParent == 'INT' and child.type not in opSymbols and child.type != 'INUMBER':
+                        if (child.type == 'ID'):
+                            typeChild = symbolsTable["table"][child.val]['type']
+                            if typeParent != typeChild:
+                                print(
+                                    "Please assign only integers variables to ID (else 1): ", assignId)
+                        else:
+                            print("Please assign only integers numbers to INT_DCL (else 2): ",
+                              assignId)
+                    semanticValidation(child, lvl+1, "ID", child.val, assignId)
+                else:
+                    semanticValidation(child, lvl+1, "init", '')
     except:
         print("\nErr: semanticValidation")
 
@@ -565,7 +612,7 @@ def genTAC(node):
             for child in node.childrens:
                 genTAC(child)
     except:
-        print("Input inválido")
+        print("Err: Variable not found")
 
 print("\n======= Start of Semantic Analysis (Tree) =======")
 semanticValidation(abstractTree)
